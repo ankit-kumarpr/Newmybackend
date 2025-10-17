@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const vendorRoutes = require('./routes/vendor');
 const categoryRoutes = require('./routes/category');
 const serviceRoutes = require('./routes/serviceRoutes');
+const searchRoutes = require('./routes/search');
 
 const app = express();
 
@@ -17,50 +18,53 @@ connectToDb();
 
 // Security middleware
 app.use(helmet());
-app.set('trust proxy', true);
-// Rate limiting
+
+// ✅ Trust only the first proxy (important for Render or any reverse proxy)
+app.set('trust proxy', 1);
+
+// ✅ Rate limiting configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 100, // Limit each IP to 100 requests per 15 minutes
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use(limiter);
 
-// CORS configuration
+// ✅ CORS configuration
 app.use(cors());
 
-// Body parsing middleware
+// ✅ Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static file serving for uploaded photos
+// ✅ Static file serving for uploaded photos
 app.use('/uploads', express.static('uploads'));
 
-// Routes
+// ✅ Routes
 app.use('/gnet/auth', authRoutes);
 app.use('/gnet/vendor', vendorRoutes);
 app.use('/gnet/category', categoryRoutes);
 app.use('/gnet/service', serviceRoutes);
-app.use('/gnet/search', require('./routes/search'));
+app.use('/gnet/search', searchRoutes);
 
-// Health check endpoint
+// ✅ Health check endpoint
 app.get('/gnet/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Grandeurnet Backend API is running',
     timestamp: new Date().toISOString()
   });
 });
 
-// 404 handler
+// ✅ 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Route not found',
-    path: req.originalUrl 
+    path: req.originalUrl
   });
 });
 
-// Error handling middleware
+// ✅ Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
