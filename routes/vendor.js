@@ -250,7 +250,7 @@ router.delete(
 // ==================== ADMIN ROUTES ====================
 
 router.get(
-  "/all",
+  "/allvendors",
   [permit("super_admin", "admin"), ...validateAdminQuery],
   vendorController.getAllVendors
 );

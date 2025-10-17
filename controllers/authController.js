@@ -828,6 +828,21 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// all users list
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" }).select("-password"); // exclude password for safety
+    if (users.length === 0) {
+      return res.status(404).json({ success: false, message: "No users found" });
+    }
+    res.status(200).json({ success: true, count: users.length, users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};
+
 module.exports = {
   createSuperAdmin,
   registerBySuperAdmin,
@@ -840,4 +855,5 @@ module.exports = {
   setActiveStatus,
   getProfile,
   updateProfile,
+  getAllUsers
 };
